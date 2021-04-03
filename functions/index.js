@@ -13,12 +13,13 @@ admin.initializeApp(functions.config().firebase);
 const db = admin.firestore();
 
 exports.registerUser = functions.https.onRequest((req, res) => {
-    cors(req, res,  () => /*async function()*/{
+    cors(req, res, () => async function () {
         // getting dest email by query string
         const user = req.query.user;
         const eventID = req.query.eventID;
-        db.collection('UserInfo').doc(user).get();
-        res.send(user);
+        var UserDoc = await db.collection('UserInfo').doc(user);
+        return UserDoc.get().then(documentSnapshot => { return res.send(documentSnapshot.data()); });
+
         // //var ownedEvents = UserDoc("owned_events")
         // var ownedEvents = ["test1","test2"]
 
