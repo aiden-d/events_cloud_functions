@@ -9,26 +9,53 @@ const functions = require("firebase-functions");
 // });
 const admin = require('firebase-admin');
 const serviceAccount = require('./amcham-app-firebase-adminsdk-j7px6-82dff37ac5.json');
-const { credential } = require("firebase-admin");
 const cors = require('cors')({ origin: true });
-admin.initializeApp({credential: admin.credential.cert(serviceAccount)});
+admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
 const db = admin.firestore();
 
 exports.registerUser = functions.https.onRequest((req, res) => {
-    cors(req, res, () => async function () {
+    cors(req, res, async function () {
         // getting dest email by query string
         const user = req.query.user;
         const eventID = req.query.eventID;
-        var UserDoc = db.collection('UserInfo').doc(user);
-        return UserDoc.get().then(documentSnapshot => { return res.send(documentSnapshot.data()); });
+        var data;
+        //update user field
+        var userEventData = [];
+        await db.collection('UserInfo').doc(user).get().then(documentSnapshot => {
+            data = documentSnapshot.data();
+        });
 
-        // //var ownedEvents = UserDoc("owned_events")
-        // var ownedEvents = ["test1","test2"]
+        try {
+            userEventData = data["owned_events"];
+            userEventData.push(eventID);
+        }
+        catch (e) {
+            console.log(e);
+            console.log("error");
+            userEventData = [eventID];
+        }
+        await db.collection('UserInfo').doc(user).set({ 'owned_events': userEventData}, {merge: true});
+       
+        //update event field
+        await db.collection('Events').doc(eventID).get().then(documentSnapshot => {
+            data = documentSnapshot.data();
+        });
+        var eventUserData = [];
+        try {
+            eventUserData = data["registered_users"];
+            eventUserData.push(user);
+        }
+        catch (e) {
+            console.log(e);
+            console.log("error");
+            eventUserData = [user];
+        }
+        await db.collection('Events').doc(eventID).set({ 'registered_users': eventUserData}, {merge: true});
 
-        // ownedEvents.push(eventID);
-        // await db.collection('UserInfo').doc(user).update({ 'owned_events': ownedEvents}).then;
-        // await db.collection('TestCollection').doc('TestDoc').update({ 'username': user , 'eventID': eventID}).then(() => { (console.log('Done')) });
-        // return ":)";
+
+        res.send('success');
+
+        return;
 
     });
 });
