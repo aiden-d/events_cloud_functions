@@ -16,9 +16,12 @@ const db = admin.firestore();
 exports.registerUser = functions.https.onRequest((req, res) => {
     cors(req, res, async function () {
         // getting dest email by query string
-        const user = req.query.user;
+        const userHash = req.query.user;
         const eventID = req.query.eventID;
         var data;
+        console.log(userHash);
+        var snapshot = await db.collection('UserInfo').where('hash', '==', userHash.toString()).get();
+        var user = snapshot.docs[0].id;
         //update user field
         var userEventData = [];
         await db.collection('UserInfo').doc(user).get().then(documentSnapshot => {
@@ -54,8 +57,27 @@ exports.registerUser = functions.https.onRequest((req, res) => {
 
 
         res.send('success');
+        res.send('you can close this window');
 
         return;
 
     });
 });
+exports.hash = functions.https.onRequest((req, res) => {
+    cors(req, res, () => {
+        const input = req.query.input;
+        var v = djb2_xor(input);
+        return res.send(v.toString());
+
+    });
+});
+
+function djb2_xor(str) {
+    let len = str.length
+    let h = 5381
+   
+    for (let i = 0; i < len; i++) {
+      h = h * 33 ^ str.charCodeAt(i)
+     }
+     return h >>> 0
+   }
