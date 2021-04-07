@@ -11,39 +11,39 @@ const admin = require('firebase-admin');
 const serviceAccount = require('./amcham-app-firebase-adminsdk-j7px6-82dff37ac5.json');
 const cors = require('cors')({ origin: true });
 const https = require('https');
-const nodemailer = require('nodemailer');
+//const nodemailer = require('nodemailer');
 admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
 const db = admin.firestore();
 
-let transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: 'amchamsa.events@gmail.com',
-        pass: '31Bextonlane#'  //you your password
-    }
-});
-exports.sendMail = functions.https.onRequest((req, res) => {
-    cors(req, res, () => {
-        // getting dest email by query string
-        const dest = req.query.dest;
-        const subject = req.query.subject;
-        const message = req.query.message;
+// let transporter = nodemailer.createTransport({
+//     service: 'gmail',
+//     auth: {
+//         user: 'amchamsa.events@gmail.com',
+//         pass: '31Bextonlane#'  //you your password
+//     }
+// });
+// exports.sendMail = functions.https.onRequest((req, res) => {
+//     cors(req, res, () => {
+//         // getting dest email by query string
+//         const dest = req.query.dest;
+//         const subject = req.query.subject;
+//         const message = req.query.message;
 
-        const mailOptions = {
-            from: 'Amcham ZA <amchamsa.events@gmail.com>', // 
-            to: dest,
-            subject: subject, // email subject
-            html: message,
-        };
-        // returning result
-        return transporter.sendMail(mailOptions, (e, info) => {
-            if (e) {
-                return res.send(e.toString());
-            }
-            return res.send('Sent');
-        });
-    });
-});
+//         const mailOptions = {
+//             from: 'Amcham ZA <amchamsa.events@gmail.com>', // 
+//             to: dest,
+//             subject: subject, // email subject
+//             html: message,
+//         };
+//         // returning result
+//         return transporter.sendMail(mailOptions, (e, info) => {
+//             if (e) {
+//                 return res.send(e.toString());
+//             }
+//             return res.send('Sent');
+//         });
+//     });
+// });
 
 exports.registerUser = functions.https.onRequest((req, res) => {
     cors(req, res, async function () {
