@@ -39,8 +39,8 @@ exports.registerUser = functions.https.onRequest((req, res) => {
             console.log("error");
             userEventData = [eventID];
         }
-        await db.collection('UserInfo').doc(user).set({ 'owned_events': userEventData}, {merge: true});
-       
+        await db.collection('UserInfo').doc(user).set({ 'owned_events': userEventData }, { merge: true });
+
         //update event field
         await db.collection('Events').doc(eventID).get().then(documentSnapshot => {
             data = documentSnapshot.data();
@@ -55,7 +55,7 @@ exports.registerUser = functions.https.onRequest((req, res) => {
             console.log("error");
             eventUserData = [user];
         }
-        await db.collection('Events').doc(eventID).set({ 'registered_users': eventUserData}, {merge: true});
+        await db.collection('Events').doc(eventID).set({ 'registered_users': eventUserData }, { merge: true });
         //var userEmailString; // make it the email with %40
         //await https.get('https://us-central1-amcham-app.cloudfunctions.net/genkey?user='+userEmailString);
         await updatekey(user);
@@ -68,24 +68,24 @@ exports.registerUser = functions.https.onRequest((req, res) => {
 exports.genkey = functions.https.onRequest((req, res) => {
     cors(req, res, async function () {
         const user = req.query.user;
-        var key = await updatekey(user); 
+        var key = await updatekey(user);
         return res.send(key);
 
     });
 });
 
 
-   function makeid(length) {
-    var result           = '';
-    var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+function makekey(length) {
+    var result = '';
+    var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     var charactersLength = characters.length;
-    for ( var i = 0; i < length; i++ ) {
-       result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    for (var i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
     }
     return result;
- }
- async function updatekey(user){
-    var key = makeid(15);
-    db.collection('UserInfo').doc(user).set({'key':key.toString()}, {merge:true});
+}
+async function updatekey(user) {
+    var key = makekey(15);
+    db.collection('UserInfo').doc(user).set({ 'key': key.toString() }, { merge: true });
     return key;
- }
+}
